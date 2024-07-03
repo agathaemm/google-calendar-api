@@ -1,4 +1,4 @@
-const { createEvent, listEvents } = require("../services/googleCalendarService");
+const { createEvent, listEvents, deleteEvent } = require("../services/googleCalendarService");
 
 const create = async (req, res) => {
   const event = req.body;
@@ -11,4 +11,10 @@ const list = async(req, res) => {
   return res.json(events); 
 }
 
-module.exports = { create, list };
+const remove = async(req, res) => {
+  const { eventId } = req.params; 
+  await deleteEvent(eventId);
+  res.status(201);
+}
+
+module.exports = { create, list, remove };

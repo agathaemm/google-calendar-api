@@ -71,45 +71,58 @@ async function authorize() {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 async function listEvents() {
-    const auth = await authorize()
-    const calendar = google.calendar({version: 'v3', auth});
-    const res = await calendar.events.list({
-        calendarId: 'primary',
-        timeMin: new Date().toISOString(),
-        maxResults: 10,
-        singleEvents: true,
-        orderBy: 'startTime',
-    });
-    const events = res.data.items;
-    if (!events || events.length === 0) {
-        console.log('No upcoming events found.');
-        return;
-    }
-    console.log('Upcoming 10 events:');
-    return events.map((event, i) => {
-        const start = event.start.dateTime || event.start.date;
-        return `${start} - ${event.summary}`
-    });
-
+  const auth = await authorize()
+  const calendar = google.calendar({version: 'v3', auth});
+  const res = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+  });
+  const events = res.data.items;
+  if (!events || events.length === 0) {
+      console.log('No upcoming events found.');
+      return;
+  }
+  
+  return events
 }
 
 async function createEvent(event) {
-    const auth = await authorize()
-    const calendar = google.calendar({version: 'v3', auth});
-    calendar.events.insert({
-        auth: auth,
-        calendarId: 'primary',
-        resource: event,
-    }, function(err, event) {
-        if (err) {
-        console.log('There was an error contacting the Calendar service: ' + err);
-        return;
-        }
-        console.log('Event created: %s', event.htmlLink);
-    });
-    return true;
+  const auth = await authorize()
+  const calendar = google.calendar({version: 'v3', auth});
+  calendar.events.insert({
+    auth: auth,
+    calendarId: 'primary',
+    resource: event,
+  }, function(err, event) {
+      if (err) {
+      console.log('There was an error contacting the Calendar service: ' + err);
+      return;
+      }
+      console.log('Event created: %s', event.htmlLink);
+  });
+
+  return true;
+}
+
+async function deleteEvent(eventId) {
+  const auth = await authorize()
+  const calendar = google.calendar({version: 'v3', auth});
+  calendar.events.delete({
+    calendarId: 'primary',
+    eventId: eventId,
+  }, function(err, event) {
+      if (err) {
+      console.log('There was an error contacting the Calendar service: ' + err);
+      return;
+      }
+      console.log('Event deleted');
+  });
+  return true;
 }
 
 
 
-module.exports = { createEvent, listEvents };
+module.exports = { createEvent, listEvents, deleteEvent };
